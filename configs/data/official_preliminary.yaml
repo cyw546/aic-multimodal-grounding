@@ -1,0 +1,12 @@
+name: official_preliminary
+split: test
+
+json_path: /root/autodl-tmp/aic_grounding/data/official/preliminary/queries/queries.json
+data_root: /root/autodl-tmp/aic_grounding/data/official/preliminary
+
+require_bbox: false
+validate_files: true
+
+expected_query_count: 9555
+expected_image_group_count: 2000
+bbox_format: xyxy_norm
