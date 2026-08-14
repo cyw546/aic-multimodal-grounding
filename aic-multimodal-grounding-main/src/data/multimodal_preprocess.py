@@ -57,8 +57,33 @@ def multimodal_early_fusion(rgb, ir, depth):
     return fuse
 
 
+def multimodal_early_fusion_from_raw(visible_raw, infrared_raw, depth_raw):
+    """
+    ✅给dataset调用：接收dataset输出原始图像，内部完成预处理+融合
+    visible_raw: H,W,3 uint8 RGB
+    infrared_raw: 原始红外图
+    depth_raw: 原始uint16深度图
+    return: fused [H,W,5] float32
+    """
+    h, w = visible_raw.shape[:2]
+    # 红外预处理
+    ir = cv2.resize(infrared_raw, (w, h)).astype(np.float32) / 255.0
+    ir = ir[..., np.newaxis]
+
+    # 深度归一化
+    depth_valid = depth_raw[depth_raw > 0]
+    if len(depth_valid) == 0:
+        depth_norm = np.zeros_like(depth_raw, dtype=np.float32)
+    else:
+        d_min, d_max = depth_valid.min(), depth_valid.max()
+        depth_norm = (depth_raw.astype(np.float32) - d_min) / (d_max - d_min + 1e-6)
+    depth_norm = cv2.resize(depth_norm, (w, h))
+    depth_norm = depth_norm[..., np.newaxis]
+
+    return multimodal_early_fusion(visible_raw, ir, depth_norm)
+
+
 if __name__ == "__main__":
-    # 测试示例，改成你本地样例图片路径运行测试
     rgb_img = read_rgb("./sample/rgb.png")
     H, W = rgb_img.shape[:2]
     ir_img = read_infrared("./sample/ir.png", target_hw=(H, W))
