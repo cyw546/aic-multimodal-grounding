@@ -1,0 +1,5 @@
+dataset:
+  type: "MultimodalGroundingDataset"
+  json_path: "./output_refcoco/train.jsonl"
+  data_root: "./external_data/coco2014/trainval"
+  require_bbox: true
