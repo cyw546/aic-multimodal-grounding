@@ -1,0 +1,6 @@
+model:
+  box_threshold: 0.35
+  text_threshold: 0.25
+
+inference:
+  device: cuda

@@ -60,4 +60,93 @@ python -m src.submission.validator \
   --zip /path/to/submission.zip
 ```
 
+
 详细协作规则见 `CONTRIBUTING.md`。严禁提交赛事数据、模型权重、预测结果、访问令牌或 SSH 密钥。
+
+# RGB Grounding Baseline
+
+本模块基于 GroundingDINO，实现 RGB 图像与文本 Query 的视觉定位接口。
+
+## 模型与权重
+
+模型：GroundingDINO SwinB
+
+权重：
+groundingdino_swinb_cogcoor.pth
+
+## 推理参数
+
+- box_threshold: 0.35
+- text_threshold: 0.25
+
+## 1. 接口说明
+
+对外接口为：
+
+```python
+Baseline.predict(image, query)
+```
+
+输入：
+
+- `image`：RGB `numpy.ndarray`
+  - shape：`(H, W, 3)`
+  - dtype：`uint8`
+- `query`：非空字符串
+
+输出格式：
+
+```python
+{
+    "bbox": [x1, y1, x2, y2],
+    "score": float,
+    "label": str
+}
+```
+
+其中：
+
+- `bbox` 为归一化 `xyxy` 坐标；
+- 坐标范围为 `[0, 1]`；
+- `score` 为当前最佳候选框得分；
+- `label` 为 GroundingDINO 返回的文本标签。
+
+## 2. 使用方法
+
+```
+from baseline.inference import Baseline
+
+
+baseline = Baseline(
+    config_path="<GROUNDING_DINO_CONFIG_PATH>",
+    weight_path="<GROUNDING_DINO_WEIGHT_PATH>"
+)
+
+
+result = baseline.predict(
+    image=rgb_image,
+    query="the silver light bulb"
+)
+
+
+print(result)
+```
+
+注意：`rgb_image` 必须是 RGB 顺序的 `numpy.ndarray`。
+
+如果使用 OpenCV 读取图片：
+
+```
+import cv2
+
+
+image = cv2.imread("example.png")
+image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+
+result = baseline.predict(
+    image,
+    "the silver light bulb"
+)
+```
+

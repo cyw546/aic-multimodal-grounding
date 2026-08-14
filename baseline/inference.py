@@ -22,7 +22,7 @@ class Baseline:
         query
     ):
 
-        raw_result = self.model.inference(
+        raw_result = self.model.predict(
             image,
             query
         )
@@ -34,5 +34,29 @@ class Baseline:
             raw_result["labels"]
         )
 
+        if result is not None:
+            return result
 
-        return result
+        # 降低阈值重新推理
+        raw_result = self.model.predict(
+            image,
+            query,
+            box_threshold=0.05,
+            text_threshold=0.05
+        )
+
+        result = process_prediction(
+            raw_result["boxes"],
+            raw_result["scores"],
+            raw_result["labels"]
+        )
+
+        if result is not None:
+            return result
+
+        # 最终合法回退
+        return {
+            "bbox": [0.25, 0.25, 0.75, 0.75],
+            "score": 0.0,
+            "label": ""
+        }
