@@ -1,6 +1,8 @@
 model:
   box_threshold: 0.35
   text_threshold: 0.25
+  fallback_box_threshold: 0.05
+  fallback_text_threshold: 0.05
 
 inference:
-  device: cuda
+  device: auto

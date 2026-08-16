@@ -71,8 +71,22 @@ python -m src.submission.validator \
 
 模型：GroundingDINO SwinB
 
-权重：
-groundingdino_swinb_cogcoor.pth
+固定使用 GroundingDINO 官方提交：
+
+```bash
+git clone https://github.com/IDEA-Research/GroundingDINO.git
+cd GroundingDINO
+git checkout 856dde20aee659246248e20734ef9ba5214f5e44
+python -m pip install --no-deps --no-build-isolation -e .
+```
+
+服务器权重路径：
+
+```text
+/root/autodl-tmp/aic_grounding/weights/groundingdino_swinb_cogcoor.pth
+```
+
+源码、权重和缓存均不得提交到本仓库。
 
 ## 推理参数
 
@@ -99,8 +113,7 @@ Baseline.predict(image, query)
 ```python
 {
     "bbox": [x1, y1, x2, y2],
-    "score": float,
-    "label": str
+    "score": float
 }
 ```
 
@@ -109,7 +122,6 @@ Baseline.predict(image, query)
 - `bbox` 为归一化 `xyxy` 坐标；
 - 坐标范围为 `[0, 1]`；
 - `score` 为当前最佳候选框得分；
-- `label` 为 GroundingDINO 返回的文本标签。
 
 ## 2. 使用方法
 
@@ -149,4 +161,3 @@ result = baseline.predict(
     "the silver light bulb"
 )
 ```
-
