@@ -1,0 +1,10 @@
+name: refcoco
+format: unified_jsonl
+source_format: padt_refcoco_jsonl
+image_root: /root/autodl-tmp/aic_grounding/data/public/coco/train2014
+train_jsonl: /root/autodl-tmp/aic_grounding/data/public/refcoco/processed/train.jsonl
+val_jsonl: /root/autodl-tmp/aic_grounding/data/public/refcoco/processed/val.jsonl
+bbox_format: xyxy_norm
+modalities:
+  - visible
+split_by: unc
