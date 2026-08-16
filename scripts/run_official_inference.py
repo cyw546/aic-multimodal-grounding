@@ -190,6 +190,7 @@ def run_inference(
     report = validate_submission_payloads(selected_original, predictions)
     output_path = write_prediction_json(predictions, output)
     partial_path.unlink(missing_ok=True)
+    error_path.unlink(missing_ok=True)
     return {
         "status": "PASS",
         "dataset_size": len(dataset),

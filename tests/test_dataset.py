@@ -3,10 +3,11 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
+import cv2
 import numpy as np
 import pytest
 
-from src.data.dataset import MultimodalGroundingDataset, _validate_bbox
+from src.data.dataset import MultimodalGroundingDataset, _read_image, _validate_bbox
 
 
 def test_bbox_validation() -> None:
@@ -46,6 +47,23 @@ def test_official_sample() -> None:
     assert sample["depth"].dtype == np.uint16
     assert sample["depth_valid_mask"].dtype == np.bool_
     assert sample["image_size"] == (1080, 1920)
+
+
+def test_depth_jpeg_is_converted_to_single_channel(tmp_path) -> None:
+    path = tmp_path / "depth.jpg"
+    image = np.zeros((12, 16, 3), dtype=np.uint8)
+    image[:, :, 0] = 20
+    image[:, :, 1] = 80
+    image[:, :, 2] = 140
+    assert cv2.imwrite(str(path), image)
+
+    depth = _read_image(path, "depth")
+
+    assert depth.shape == (12, 16)
+    assert depth.dtype == np.uint8
+    assert depth.flags.c_contiguous
+
+
 def test_official_preliminary_dataset() -> None:
     root = Path(
         os.environ.get(
