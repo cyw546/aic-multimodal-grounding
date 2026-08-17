@@ -41,10 +41,16 @@ def _read_image(path: Path, modality: str) -> np.ndarray:
         if image.ndim == 3 and image.shape[2] == 3:
             image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     elif modality == "depth":
+        if image.ndim == 3 and image.shape[2] == 3:
+            image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         if image.ndim != 2:
-            raise ValueError(f"Depth image must be single-channel, got {image.shape}: {path}")
-        if image.dtype != np.uint16:
-            raise ValueError(f"Depth image must be uint16, got {image.dtype}: {path}")
+            raise ValueError(
+                f"Depth image must be single-channel or BGR, got {image.shape}: {path}"
+            )
+        if image.dtype not in (np.uint8, np.uint16):
+            raise ValueError(
+                f"Depth image must be uint8 or uint16, got {image.dtype}: {path}"
+            )
 
     return np.ascontiguousarray(image)
 

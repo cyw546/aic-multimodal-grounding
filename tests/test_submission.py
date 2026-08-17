@@ -108,3 +108,40 @@ def test_zip_with_extra_file_is_rejected(tmp_path: Path) -> None:
 
     with pytest.raises(ValueError, match="exactly one file"):
         validate_submission_zip(original_path, archive_path)
+def test_prediction_can_add_bbox_to_official_record(
+    tmp_path: Path,
+) -> None:
+    original = {
+        "000001_001": {
+            "visible": "Images/visible/000001.png",
+            "infrared": "Images/infrared/000001.png",
+            "depth": "Images/depth/000001.png",
+            "query": "the target",
+        }
+    }
+
+    prediction = {
+        "000001_001": {
+            "visible": "Images/visible/000001.png",
+            "infrared": "Images/infrared/000001.png",
+            "depth": "Images/depth/000001.png",
+            "query": "the target",
+            "bbox": [0.1, 0.2, 0.7, 0.9],
+        }
+    }
+
+    original_path = tmp_path / "original.json"
+    prediction_path = tmp_path / "prediction.json"
+
+    _write_json(original_path, original)
+    _write_json(prediction_path, prediction)
+
+    report = validate_submission_files(
+        original_path,
+        prediction_path,
+    )
+
+    assert report == {
+        "sample_count": 1,
+        "valid_bbox_count": 1,
+    }

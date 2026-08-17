@@ -44,13 +44,14 @@ def validate_submission_payloads(
 
         source_fields = set(source)
         result_fields = set(result)
-        if source_fields != result_fields:
+        expected_result_fields = source_fields | {"bbox"}
+
+        if result_fields != expected_result_fields:
             raise ValueError(
-                f"{query_id}: field mismatch; expected={sorted(source_fields)}, "
+                f"{query_id}: field mismatch; "
+                f"expected={sorted(expected_result_fields)}, "
                 f"got={sorted(result_fields)}"
             )
-        if "bbox" not in result:
-            raise ValueError(f"{query_id}: bbox field is missing")
 
         for field, source_value in source.items():
             if field != "bbox" and result[field] != source_value:
