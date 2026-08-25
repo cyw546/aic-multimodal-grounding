@@ -1,0 +1,4 @@
+json_path: /root/autodl-tmp/aic_grounding/data/sample/sample.json
+data_root: /root/autodl-tmp/aic_grounding/data/sample
+require_bbox: true
+validate_files: true

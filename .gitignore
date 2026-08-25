@@ -1,0 +1,60 @@
+# Repository-external competition artifacts
+/data/
+/checkpoints/
+/outputs/
+/submissions/
+/logs/
+/cache/
+*.zip
+
+# Model weights and large binaries
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+*.onnx
+*.engine
+*.bin
+*.pkl
+
+# Credentials and local configuration
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*_rsa
+*_rsa.pub
+*_ed25519
+*_ed25519.pub
+*credentials*
+*secrets*
+
+# Python and build artifacts
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+*.egg-info/
+build/
+dist/
+.venv/
+venv/
+
+# Experiment tools
+wandb/
+runs/
+lightning_logs/
+.ipynb_checkpoints/
+
+# Editors and operating systems
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Machine-specific exact environment snapshot
+requirements-lock.txt

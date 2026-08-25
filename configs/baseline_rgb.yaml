@@ -1,0 +1,24 @@
+experiment:
+  name: rgb_grounding_baseline
+  seed: 42
+
+data:
+  config: configs/data/sample.yaml
+  num_workers: 4
+
+model:
+  name: grounding_baseline
+  pretrained_path: null
+  freeze_backbone: true
+
+training:
+  epochs: 10
+  batch_size: 1
+  gradient_accumulation_steps: 8
+  learning_rate: 0.0001
+  weight_decay: 0.0001
+  precision: bf16
+
+evaluation:
+  primary_metric: acc_at_0_5
+  iou_threshold: 0.5
