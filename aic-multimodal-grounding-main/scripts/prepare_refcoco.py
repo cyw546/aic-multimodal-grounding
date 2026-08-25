@@ -6,6 +6,24 @@ import random
 from refer import REFER
 
 
+def is_bbox_valid(bbox, img_w, img_h):
+    x1, y1, x2, y2 = bbox
+    if x2 <= x1 or y2 <= y1:
+        return False, None
+    if x1 < 0 or y1 < 0 or x2 > img_w or y2 > img_h:
+        return False, None
+    out = [
+        x1 / img_w,
+        y1 / img_h,
+        x2 / img_w,
+        y2 / img_h
+    ]
+    for v in out:
+        if v < 0 or v > 1:
+            return False, None
+    return True, out
+
+
 def convert_refcoco(refer: REFER, image_root: Path, out_dir: Path, dataset_name="refcoco"):
     out_dir.mkdir(exist_ok=True, parents=True)
     splits = {"train": [], "val": []}
@@ -25,14 +43,8 @@ def convert_refcoco(refer: REFER, image_root: Path, out_dir: Path, dataset_name=
         img_w = img["width"]
         img_h = img["height"]
 
-        # 归一化到0~1 xyxy
-        x1n = max(0.0, x1 / img_w)
-        y1n = max(0.0, y1 / img_h)
-        x2n = min(1.0, x2 / img_w)
-        y2n = min(1.0, y2 / img_h)
-
-        # 过滤非法框
-        if not (0 <= x1n < x2n <= 1 and 0 <= y1n < y2n <= 1):
+        ok, norm_bbox = is_bbox_valid([x1, y1, x2, y2], img_w, img_h)
+        if not ok:
             continue
 
         split = ref["split"]
@@ -41,6 +53,10 @@ def convert_refcoco(refer: REFER, image_root: Path, out_dir: Path, dataset_name=
 
         sample_id = f"{dataset_name}_{split}_{ref_id:08d}"
         query_text = ref["sentences"][0]["sent"].strip()
+        # 过滤空query
+        if not query_text:
+            continue
+
         visible_path = os.path.basename(img["file_name"])
 
         item = {
@@ -52,7 +68,7 @@ def convert_refcoco(refer: REFER, image_root: Path, out_dir: Path, dataset_name=
             "visible_path": visible_path,
             "infrared_path": None,
             "depth_path": None,
-            "bbox": [round(x1n, 6), round(y1n, 6), round(x2n, 6), round(y2n, 6)],
+            "bbox": [round(norm_bbox[0], 6), round(norm_bbox[1], 6), round(norm_bbox[2], 6), round(norm_bbox[3], 6)],
             "bbox_format": "xyxy_norm",
             "width": img_w,
             "height": img_h
@@ -72,12 +88,18 @@ def convert_refcoco(refer: REFER, image_root: Path, out_dir: Path, dataset_name=
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--dataset", default="refcoco", choices=["refcoco", "refcoco+", "refcocog"])
-    parser.add_argument("--data-root", type=str, help="refer数据集根目录")
+    parser.add_argument("--data-root", type=str, default="/root/autodl-tmp/aic_grounding/data/public/refcoco", help="refer数据集根目录")
     parser.add_argument("--image-root", type=str, help="coco2014图片文件夹")
     parser.add_argument("--out-dir", type=str, help="输出train.jsonl val.jsonl的目录")
     args = parser.parse_args()
 
-    refer = REFER(data_root=args.data_root, dataset=args.dataset, splitBy="unc")
+    data_root = Path(args.data_root)
+    if not data_root.exists():
+        print(f"【错误】标注文件夹不存在：{data_root}")
+        print("请放入RefCOCO原始标注文件到此路径")
+        raise SystemExit(1)
+
+    refer = REFER(data_root=str(data_root), dataset=args.dataset, splitBy="unc")
     convert_refcoco(refer, Path(args.image_root), Path(args.out_dir), dataset_name=args.dataset)
 
 
