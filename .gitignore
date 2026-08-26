@@ -2,6 +2,7 @@
 /data/
 /checkpoints/
 /outputs/
+/output_refcoco/
 /submissions/
 /logs/
 /cache/

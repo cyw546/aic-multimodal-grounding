@@ -65,15 +65,22 @@ def test_depth_jpeg_is_converted_to_single_channel(tmp_path) -> None:
 
 
 def test_official_preliminary_dataset() -> None:
-    root = Path(
-        os.environ.get(
-            "AIC_OFFICIAL_ROOT",
-            "/root/autodl-tmp/aic_grounding/data/official/preliminary",
+    root_value = os.environ.get("AIC_OFFICIAL_ROOT")
+    if not root_value:
+        pytest.skip(
+            "AIC_OFFICIAL_ROOT is not configured; "
+            "skipping official dataset integration test"
         )
-    )
+
+    root = Path(root_value)
     json_path = root / "queries" / "queries.json"
 
-    if not json_path.is_file():
+    try:
+        json_exists = json_path.is_file()
+    except OSError as exc:
+        pytest.skip(f"Official preliminary data is not accessible: {exc}")
+
+    if not json_exists:
         pytest.skip(f"Official preliminary data not found at {root}")
 
     dataset = MultimodalGroundingDataset(
