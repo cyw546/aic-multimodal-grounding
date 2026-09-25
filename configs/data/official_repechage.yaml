@@ -1,0 +1,12 @@
+name: official_repechage
+split: test
+
+json_path: ${AIC_OFFICIAL_ROOT}/queries/queries.json
+data_root: ${AIC_OFFICIAL_ROOT}
+
+require_bbox: false
+validate_files: true
+
+expected_query_count: 5690
+expected_image_group_count: 2000
+bbox_format: xyxy_norm

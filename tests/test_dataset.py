@@ -64,7 +64,7 @@ def test_depth_jpeg_is_converted_to_single_channel(tmp_path) -> None:
     assert depth.flags.c_contiguous
 
 
-def test_official_preliminary_dataset() -> None:
+def test_official_dataset() -> None:
     root_value = os.environ.get("AIC_OFFICIAL_ROOT")
     if not root_value:
         pytest.skip(
@@ -78,10 +78,10 @@ def test_official_preliminary_dataset() -> None:
     try:
         json_exists = json_path.is_file()
     except OSError as exc:
-        pytest.skip(f"Official preliminary data is not accessible: {exc}")
+        pytest.skip(f"Official data is not accessible: {exc}")
 
     if not json_exists:
-        pytest.skip(f"Official preliminary data not found at {root}")
+        pytest.skip(f"Official dataset not found at {root}")
 
     dataset = MultimodalGroundingDataset(
         json_path=json_path,
@@ -90,10 +90,12 @@ def test_official_preliminary_dataset() -> None:
         validate_files=True,
     )
 
-    assert len(dataset) == 9555
+    assert len(dataset) > 0
+    expected_count = os.environ.get("AIC_EXPECTED_QUERY_COUNT")
+    if expected_count:
+        assert len(dataset) == int(expected_count)
 
-    indices = [0, len(dataset) // 2, len(dataset) - 1]
-
+    indices = sorted({0, len(dataset) // 2, len(dataset) - 1})
     for index in indices:
         sample = dataset[index]
 
@@ -102,23 +104,22 @@ def test_official_preliminary_dataset() -> None:
         assert isinstance(sample["query"], str)
         assert sample["query"]
 
-        assert sample["visible"].shape == (1080, 1920, 3)
+        assert sample["visible"].ndim == 3
+        assert sample["visible"].shape[2] == 3
         assert sample["visible"].dtype == np.uint8
 
-        assert sample["infrared"].shape[:2] == (1080, 1920)
-        assert sample["depth"].shape == (1080, 1920)
-        assert sample["depth"].dtype == np.uint16
-
+        assert sample["infrared"].ndim in (2, 3)
+        assert sample["depth"].ndim == 2
+        assert sample["depth"].dtype in (np.uint8, np.uint16)
         assert sample["depth_valid_mask"].dtype == np.bool_
-        assert sample["image_size"] == (1080, 1920)
-
-        assert "bbox" not in sample
 
         assert (
             sample["visible"].shape[:2]
             == sample["infrared"].shape[:2]
             == sample["depth"].shape[:2]
+            == sample["image_size"]
         )
+        assert "bbox" not in sample
 
         for path in sample["paths"].values():
             assert Path(path).is_file()
