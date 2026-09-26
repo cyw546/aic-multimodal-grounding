@@ -1,0 +1,17 @@
+STATUS.txt
+commands.log
+stdout.log
+stderr.log
+environment_before.json
+environment_after.json
+groundingdino_commit.txt
+weight_sha256.txt
+project_payload_status.txt
+experiment/smoke_1.json
+experiment/smoke_10.json
+experiment/query_ids_100.json
+experiment/experiment_summary.json
+experiment/visualization_manifest.json
+experiment/visualizations/*.jpg
+checksums.txt
+

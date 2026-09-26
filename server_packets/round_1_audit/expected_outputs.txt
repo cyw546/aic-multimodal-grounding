@@ -1,0 +1,13 @@
+STATUS.txt
+summary.json
+report.txt
+commands.log
+stdout.log
+stderr.log
+git_status.txt
+dataset_summary.json
+python_runtime.txt
+groundingdino_candidates.txt
+weight_candidates.txt
+checksums.txt
+

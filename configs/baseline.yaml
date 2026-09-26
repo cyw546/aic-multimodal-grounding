@@ -1,5 +1,5 @@
 model:
-  box_threshold: 0.35
+  box_threshold: 0.25
   text_threshold: 0.25
   fallback_box_threshold: 0.05
   fallback_text_threshold: 0.05
