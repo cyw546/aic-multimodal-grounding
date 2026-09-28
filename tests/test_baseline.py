@@ -48,6 +48,25 @@ def test_predict_retries_and_returns_default():
     model = FakeModel([empty, empty])
     result = Baseline(model=model).predict(np.zeros((4, 4, 3), dtype=np.uint8), "x")
     assert result == {"bbox": [0.25, 0.25, 0.75, 0.75], "score": 0.0}
+
+
+def test_detailed_prediction_reports_fallback_stage():
+    model = FakeModel([
+        raw([], [], []),
+        raw([[0.5, 0.5, 0.4, 0.2]], [0.6], ["target"]),
+    ])
+    predictor = Baseline(model=model)
+
+    result = predictor.predict_detailed(
+        np.zeros((12, 16, 3), dtype=np.uint8),
+        "target",
+    )
+
+    assert result["stage"] == "fallback_threshold"
+    assert result["primary_candidate_count"] == 0
+    assert result["fallback_candidate_count"] == 1
+    assert result["bbox"] == pytest.approx([0.3, 0.4, 0.7, 0.6])
+    assert result["score"] == pytest.approx(0.6)
     json.dumps(result)
 
 

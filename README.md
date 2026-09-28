@@ -83,15 +83,19 @@ python -m pip install --no-deps --no-build-isolation -e .
 服务器权重路径：
 
 ```text
-/root/autodl-tmp/aic_grounding/weights/groundingdino_swinb_cogcoor.pth
+/srv/nfs/home/njnu_lhf/aic-repechage/weights/groundingdino_swinb_cogcoor.pth
 ```
 
 源码、权重和缓存均不得提交到本仓库。
 
 ## 推理参数
 
-- box_threshold: 0.35
+- box_threshold: 0.25
 - text_threshold: 0.25
+- fallback_box_threshold: 0.05
+- fallback_text_threshold: 0.05
+
+这是固定 100 条复赛查询上四组阈值实验得到的 V1 推荐配置。完整环境、权重校验、结果表与人工检查记录见 [`docs/repechage_rgb_baseline.md`](docs/repechage_rgb_baseline.md)。
 
 ## 1. 接口说明
 

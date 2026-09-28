@@ -68,21 +68,49 @@ class Baseline:
             "score": float(result["score"]),
         }
 
-    def predict(self, image, query) -> dict:
+    def predict_detailed(self, image, query) -> dict:
+        """Predict with diagnostics while keeping ``predict`` JSON-compatible.
+
+        ``stage`` distinguishes a primary-threshold detection, a detection found
+        only after lowering thresholds, and the final fixed default box. This is
+        intended for experiment reporting; submission records must still use the
+        public ``predict`` result and write only the bbox into official JSON.
+        """
         raw = self.model.predict(
             image, query,
             box_threshold=self.box_threshold,
             text_threshold=self.text_threshold,
         )
+        primary_candidate_count = len(raw["boxes"])
         result = process_prediction(raw["boxes"], raw["scores"], raw["labels"])
         if result is not None:
-            return self._public_result(result)
+            return {
+                **self._public_result(result),
+                "stage": "primary",
+                "primary_candidate_count": primary_candidate_count,
+                "fallback_candidate_count": 0,
+            }
         raw = self.model.predict(
             image, query,
             box_threshold=self.fallback_box_threshold,
             text_threshold=self.fallback_text_threshold,
         )
+        fallback_candidate_count = len(raw["boxes"])
         result = process_prediction(raw["boxes"], raw["scores"], raw["labels"])
         if result is not None:
-            return self._public_result(result)
-        return {"bbox": [0.25, 0.25, 0.75, 0.75], "score": 0.0}
+            return {
+                **self._public_result(result),
+                "stage": "fallback_threshold",
+                "primary_candidate_count": primary_candidate_count,
+                "fallback_candidate_count": fallback_candidate_count,
+            }
+        return {
+            "bbox": [0.25, 0.25, 0.75, 0.75],
+            "score": 0.0,
+            "stage": "default_box",
+            "primary_candidate_count": primary_candidate_count,
+            "fallback_candidate_count": fallback_candidate_count,
+        }
+
+    def predict(self, image, query) -> dict:
+        return self._public_result(self.predict_detailed(image, query))
