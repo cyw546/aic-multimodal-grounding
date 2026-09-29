@@ -34,8 +34,10 @@ the production dataset reader, and creates 20 images containing the annotated
 box and referring expression.
 
 The random seed and source file must remain unchanged when comparing model
-configurations. A different seed creates a different benchmark and makes scores
-incomparable.
+configurations. The frozen 400-ID list is committed at
+`configs/validation/local_val_400_ids.txt`; its source and file hashes are
+recorded in `configs/validation/local_val_400_manifest.json`. A different seed
+creates a different benchmark and makes scores incomparable.
 
 ## Output record
 

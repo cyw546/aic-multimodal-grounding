@@ -165,3 +165,7 @@ result = baseline.predict(
     "the silver light bulb"
 )
 ```
+
+## 模型评估与候选框诊断
+
+统一评估器、固定验证清单和候选覆盖率说明见 [`docs/model_evaluation_and_candidate_diagnosis.md`](docs/model_evaluation_and_candidate_diagnosis.md)。入口命令为：`python scripts/evaluate_predictions.py --help`。
