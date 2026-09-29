@@ -97,3 +97,37 @@ def test_yaml_configuration(tmp_path, monkeypatch):
     }
     assert predictor.box_threshold == pytest.approx(0.4)
     assert predictor.text_threshold == pytest.approx(0.3)
+
+def test_predict_candidates_returns_ranked_top_k():
+    model = FakeModel([raw(
+        torch.tensor([
+            [0.5, 0.5, 0.4, 0.2],
+            [0.4, 0.4, 0.2, 0.2],
+        ]),
+        torch.tensor([0.8, 0.9]),
+        ["first", "second"],
+    )])
+    result = Baseline(model=model).predict_candidates(
+        np.zeros((8, 10, 3), dtype=np.uint8),
+        "target",
+        top_k=1,
+    )
+    assert result["stage"] == "primary"
+    assert result["bbox"] == pytest.approx([0.3, 0.3, 0.5, 0.5])
+    assert len(result["candidates"]) == 1
+    assert result["candidates"][0]["label"] == "second"
+    json.dumps(result)
+
+
+def test_predict_candidates_retries_then_reports_empty_without_default():
+    empty = raw(torch.empty((0, 4)), torch.empty(0), [])
+    model = FakeModel([empty, empty])
+    result = Baseline(model=model).predict_candidates(
+        np.zeros((4, 4, 3), dtype=np.uint8),
+        "x",
+    )
+    assert result["bbox"] is None
+    assert result["score"] is None
+    assert result["candidates"] == []
+    assert result["stage"] == "fallback_threshold"
+    json.dumps(result)

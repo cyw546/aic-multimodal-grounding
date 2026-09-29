@@ -63,6 +63,27 @@ candidate is evaluated as the model prediction. This is useful for measuring a
 candidate generator directly, but the comparison table identifies it as
 `candidate_top1`.
 
+## Export Grounding DINO candidates
+
+Run the current baseline on the frozen public subset before evaluation:
+
+```bash
+python scripts/export_grounding_dino_candidates.py \
+  --validation output_refcoco/local_val/local_val_400.jsonl \
+  --ids configs/validation/local_val_400_ids.txt \
+  --image-root /root/autodl-tmp/aic_grounding/data/public/coco/train2014 \
+  --pipeline-config configs/baseline.yaml \
+  --model-config /srv/nfs/home/njnu_lhf/aic-repechage/external/GroundingDINO/groundingdino/config/GroundingDINO_SwinB_cfg.py \
+  --weights /srv/nfs/home/njnu_lhf/aic-repechage/weights/groundingdino_swinb_cogcoor.pth \
+  --output outputs/evaluation/dino_candidates.jsonl \
+  --top-k 10
+```
+
+The output contains top-1-compatible `bbox`/`score` fields and the ranked
+`candidates` list. When only this file is supplied to the evaluator as
+`--candidate dino=...`, top-1 is evaluated as the DINO prediction and coverage
+is computed from the same ranked list.
+
 ## Reported metrics
 
 - `ACC@0.5`: correct samples divided by all fixed validation samples. Missing
