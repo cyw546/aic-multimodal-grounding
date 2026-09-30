@@ -43,3 +43,27 @@ def process_prediction(boxes, scores, labels) -> dict | None:
     if bbox is None:
         return None
     return {"bbox": bbox, "score": float(best["score"]), "label": best["label"]}
+
+def process_candidates(boxes, scores, labels, *, top_k: int | None = None):
+    """Convert ranked detector output to JSON-safe normalized candidates."""
+
+    score_values = torch.as_tensor(scores).detach().cpu().flatten()
+    if top_k is not None and top_k <= 0:
+        raise ValueError("top_k must be a positive integer")
+    if len(boxes) != score_values.numel() or len(labels) != score_values.numel():
+        raise ValueError("boxes, scores and labels must have equal lengths")
+    if not torch.isfinite(score_values).all():
+        raise ValueError("scores contain NaN or infinity")
+
+    candidates = []
+    for index, score in enumerate(score_values.tolist()):
+        bbox = box_cxcywh_to_xyxy(boxes[index])
+        if bbox is None:
+            continue
+        candidates.append({
+            "bbox": bbox,
+            "score": float(score),
+            "label": str(labels[index]),
+        })
+    candidates.sort(key=lambda item: item["score"], reverse=True)
+    return candidates if top_k is None else candidates[:top_k]

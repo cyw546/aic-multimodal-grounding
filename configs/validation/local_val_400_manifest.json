@@ -1,0 +1,16 @@
+{
+  "name": "refcoco_val_400",
+  "source": "PaDT-MLLM/RefCOCO refcoco_val.json",
+  "source_url": "https://huggingface.co/datasets/PaDT-MLLM/RefCOCO",
+  "source_sha256": "3a59267d9481e47c1f3045ef87dfb2cac2638f9c384b3aa524a36a49e342bc2e",
+  "converted_val_sha256": "96a944bdcfc7f54eacbd0c23a137c398eae2551f382e1e86abe1aa01b92f72d0",
+  "conversion_script": "scripts/prepare_refcoco.py",
+  "sample_builder": "scripts/build_local_validation.py",
+  "source_record_count": 10834,
+  "sample_count": 400,
+  "seed": 42,
+  "selection": "sorted(random.Random(seed).sample(range(source_record_count), sample_count))",
+  "ids_sha256": "65f2869a0b9dca7bb9e18b82135118522d70c249a4625231901f03767d58909d",
+  "first_id": "refcoco_val_00000010",
+  "last_id": "refcoco_val_00010810"
+}

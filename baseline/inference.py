@@ -6,7 +6,7 @@ from typing import Any
 import yaml
 
 from baseline.grounding_model import GroundingModel
-from baseline.postprocess import process_prediction
+from baseline.postprocess import process_candidates, process_prediction
 
 
 class Baseline:
@@ -110,6 +110,48 @@ class Baseline:
             "stage": "default_box",
             "primary_candidate_count": primary_candidate_count,
             "fallback_candidate_count": fallback_candidate_count,
+        }
+
+    def predict_candidates(self, image, query, *, top_k: int = 10) -> dict:
+        """Return ranked top-K candidates without inserting a default box."""
+
+        if top_k <= 0:
+            raise ValueError("top_k must be a positive integer")
+        raw = self.model.predict(
+            image, query,
+            box_threshold=self.box_threshold,
+            text_threshold=self.text_threshold,
+        )
+        primary_count = len(raw["boxes"])
+        candidates = process_candidates(
+            raw["boxes"],
+            raw["scores"],
+            raw["labels"],
+            top_k=top_k,
+        )
+        stage = "primary"
+        fallback_count = 0
+        if not candidates:
+            raw = self.model.predict(
+                image, query,
+                box_threshold=self.fallback_box_threshold,
+                text_threshold=self.fallback_text_threshold,
+            )
+            fallback_count = len(raw["boxes"])
+            candidates = process_candidates(
+                raw["boxes"],
+                raw["scores"],
+                raw["labels"],
+                top_k=top_k,
+            )
+            stage = "fallback_threshold"
+        return {
+            "bbox": candidates[0]["bbox"] if candidates else None,
+            "score": candidates[0]["score"] if candidates else None,
+            "candidates": candidates,
+            "stage": stage,
+            "primary_candidate_count": primary_count,
+            "fallback_candidate_count": fallback_count,
         }
 
     def predict(self, image, query) -> dict:

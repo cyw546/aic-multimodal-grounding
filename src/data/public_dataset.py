@@ -77,7 +77,11 @@ class PublicGroundingDataset(Dataset[Sample]):
     def __getitem__(self, index: int) -> Sample:
         record = self.records[index]
         path = self._resolve_image(record["visible_path"])
-        image = cv2.imread(str(path), cv2.IMREAD_COLOR)
+        try:
+            encoded = np.fromfile(str(path), dtype=np.uint8)
+            image = cv2.imdecode(encoded, cv2.IMREAD_COLOR)
+        except OSError as exc:
+            raise FileNotFoundError(f"failed to read RGB image: {path}") from exc
         if image is None:
             raise FileNotFoundError(f"failed to read RGB image: {path}")
         image = np.ascontiguousarray(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
